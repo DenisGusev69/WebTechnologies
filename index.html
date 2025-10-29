@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Список дел</h1>
+    </header>
+    <main>
+        <div class="task">
+            <div class="task_info">
+                <input type="text" name="task" id="task" required placeholder="Введите задачу">
+            </div>
+            <div class="more_info">
+                <div class="category">
+                    <select id="category">
+                        <option value="Home">Дом</option>
+                        <option value="Study">Университет</option>
+                        <option value="Work">Работа</option>
+                        <option value="Other">Другое</option>
+                    </select>
+                </div>
+                <div class="priority">
+                    <select id="priority">
+                        <option value="Low">Низкий</option>
+                        <option value="Middle">Средний</option>
+                        <option value="High">Высокий</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="button" id="add">Добавить</button>
+
+        <div class="my_task" id="my_task">
+
+        </div>
+
+        <button type="button" class="button" id="change">Редактировать</button>
+        <button type="button" class="button" id="remove">Удалить</button>
+    </main>
+
+
+
+    <footer>
+        <p>
+            Гусев Денис Алексеевич, 2251
+        </p>
+        <p>
+            <a href="https://vk.com/denis_gus0"> <img src="images/vk.png" alt="vk" class="media_img"> </a>
+            <a href="https://uni-dubna.ru/"> <img src="images/logo_30.svg" alt="web" class="media_img"> </a>
+            <a href="https://t.me/s/unidubna_official?ysclid=mfb07c2rrr532613351"> <img
+                    src="images/telegram_5968804.png" alt="tg" class="media_img"> </a>
+        </p>
+        <p>
+            Университет Дубна, 2025
+        </p>
+    </footer>
+</body>
+<script src="code.js"></script>
+
+</html>
