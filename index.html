@@ -14,11 +14,13 @@
     </header>
     <main>
         <div class="task">
+            <span>Задача</span>
             <div class="task_info">
                 <input type="text" name="task" id="task" required placeholder="Введите задачу">
             </div>
             <div class="more_info">
                 <div class="category">
+                    <span>Место</span>
                     <select id="category">
                         <option value="Home">Дом</option>
                         <option value="Study">Университет</option>
@@ -27,6 +29,7 @@
                     </select>
                 </div>
                 <div class="priority">
+                    <span>Приоритет</span>
                     <select id="priority">
                         <option value="Low">Низкий</option>
                         <option value="Middle">Средний</option>
@@ -34,8 +37,9 @@
                     </select>
                 </div>
             </div>
+            <button type="button" class="button" id="add">Добавить</button>
         </div>
-        <button type="button" class="button" id="add">Добавить</button>
+        
 
         <div class="my_task" id="my_task">
 
