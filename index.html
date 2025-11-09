@@ -40,7 +40,30 @@
             <button type="button" class="button" id="add">Добавить</button>
         </div>
         
-        <button type="button" class="button" id="change"></button>
+        <div class="controls-row">
+
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <select id="filter-category" class="filter-select">
+                        <option value="all">Все места</option>
+                        <option value="Home">Дом</option>
+                        <option value="Study">Университет</option>
+                        <option value="Work">Работа</option>
+                        <option value="Other">Другое</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="filter-priority" class="filter-select">
+                        <option value="all">Все приоритеты</option>
+                        <option value="High">Высокий</option>
+                        <option value="Middle">Средний</option>
+                        <option value="Low">Низкий</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="button" id="change">Сортировка: По дате</button>
+        </div>
+        
         <div class="my_task" id="my_task">
 
         </div>

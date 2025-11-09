@@ -250,3 +250,28 @@ footer{
     color: #666;
     font-style: italic;
 }
+.controls-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 15px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center; 
+}
+.filter-select {
+    width: 100%;
+    padding: 10px 10px;
+    border: 2px solid #dedede;
+    border-radius: 10px;
+    font-size: 18px;
+    background-color: rgb(240, 240, 240);
+   
+}

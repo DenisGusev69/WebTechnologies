@@ -7,13 +7,17 @@ const taskInput = document.getElementById("task");
 const categorySelect = document.getElementById("category");
 const prioritySelect = document.getElementById("priority");
 const myTaskDiv = document.getElementById("my_task");
-
+const filterCategorySelect = document.getElementById("filter-category");
+const filterPrioritySelect = document.getElementById("filter-priority");
 myTaskDiv.innerHTML = "";
 
 let tasks = [];
 let currentEditId = null;
 let sortBy = 'date';
-
+let currentFilters = {
+    category: 'all',
+    priority: 'all'
+};
 changeButton.style.display = "none";
 
 addButton.addEventListener("click", () => {
@@ -22,7 +26,6 @@ addButton.addEventListener("click", () => {
     let priorityValue = prioritySelect.value;
 
     if (taskText == "") {
-        console.log("Введите задачу");
         taskInput.classList.add("invalid");
         //myTaskDiv.innerHTML += "<p class='error'>Введите задачу</p>";
         return;
@@ -66,7 +69,6 @@ addButton.addEventListener("click", () => {
 });
 
 changeButton.addEventListener("click", () => {
-    console.log("Режим редактирования");
     if (sortBy == 'date') {
         sortBy = 'category';
         changeButton.textContent = 'Сортировка: По месту';
@@ -77,6 +79,15 @@ changeButton.addEventListener("click", () => {
         sortBy = 'date';
         changeButton.textContent = 'Сортировка: По дате';
     }
+    renderTasks();
+});
+filterCategorySelect.addEventListener("change", () => {
+    currentFilters.category = filterCategorySelect.value;
+    renderTasks();
+});
+
+filterPrioritySelect.addEventListener("change", () => {
+    currentFilters.priority = filterPrioritySelect.value;
     renderTasks();
 });
 /*
@@ -122,13 +133,14 @@ function renderTasks() {
         sortBy = 'date';
         changeButton.textContent = 'Сортировка: По дате';
     }
-    /*
-    if (tasks.length == 0) {
-        myTaskDiv.innerHTML = '<p class="no-tasks">Задачи отсутствуют</p>';
+
+    const filteredTasks = filterTasks(tasks);
+    const sortedTasks = sortTasks(filteredTasks);
+
+    if (filteredTasks.length === 0) {
+        myTaskDiv.innerHTML = '<p class="no-tasks">Задачи не найдены</p>';
         return;
     }
-    */
-    const sortedTasks = sortTasks(tasks);
 
     sortedTasks.forEach((task) => {
         const categoryText = getCategoryText(task.category);
@@ -188,7 +200,16 @@ function sortTasks(tasks) {
             return tasks;
     }
 }
-
+function filterTasks(tasks) {
+    return tasks.filter(task => {
+        
+        const categoryMatch = currentFilters.category == 'all' || task.category == currentFilters.category;
+        
+        const priorityMatch = currentFilters.priority == 'all' || task.priority == currentFilters.priority;
+        
+        return categoryMatch && priorityMatch;
+    });
+}
 function CompleteTask(e) {
     const taskItem = e.target.closest('.task-item');
     const taskId = parseInt(taskItem.dataset.id);
@@ -232,7 +253,6 @@ function DeleteTask(e) {
 
     }
 }
-
 
 function formatDateTime(date) {
     const taskDate = new Date(date);
