@@ -1,3 +1,4 @@
+
 console.log("ToDo List loaded");
 
 const addButton = document.getElementById("add");
@@ -6,11 +7,14 @@ const removeButton = document.getElementById("remove");
 const taskInput = document.getElementById("task");
 const categorySelect = document.getElementById("category");
 const prioritySelect = document.getElementById("priority");
-const myTaskDiv = document.getElementById("my_task");
+
 const filterCategorySelect = document.getElementById("filter-category");
 const filterPrioritySelect = document.getElementById("filter-priority");
-myTaskDiv.innerHTML = "";
 
+const homeTasks = document.getElementById("t_home");
+const studyTasks = document.getElementById("t_study");
+const workTasks = document.getElementById("t_work");
+const otherTasks = document.getElementById("t_other");
 let tasks = [];
 let currentEditId = null;
 let sortBy = 'date';
@@ -19,6 +23,14 @@ let currentFilters = {
     priority: 'all'
 };
 changeButton.style.display = "none";
+!localStorage.tasks ? tasks = [] : tasks = JSON.parse(localStorage.getItem('tasks'));
+
+const updateLocalStorage = () => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+changeButton.style.display = "none";
+
+renderTasks();
 
 addButton.addEventListener("click", () => {
     let taskText = taskInput.value.trim();
@@ -32,16 +44,16 @@ addButton.addEventListener("click", () => {
     } else {
         taskInput.classList.remove("invalid");
     }
-/*
-    if (taskText.length < 3) {
-        console.log("Задача должна содержать минимум 3 символа");
-        taskInput.classList.add("invalid");
-        //myTaskDiv.innerHTML += "<p class='error'>Задача должна содержать минимум 3 символа</p>";
-        return;
-    } else {
-        taskInput.classList.remove("invalid");
-    }
-*/
+    /*
+        if (taskText.length < 3) {
+            console.log("Задача должна содержать минимум 3 символа");
+            taskInput.classList.add("invalid");
+            //myTaskDiv.innerHTML += "<p class='error'>Задача должна содержать минимум 3 символа</p>";
+            return;
+        } else {
+            taskInput.classList.remove("invalid");
+        }
+    */
     if (currentEditId !== null) {
         const taskIndex = tasks.findIndex(task => task.id == currentEditId);
         if (taskIndex !== -1) {
@@ -50,6 +62,7 @@ addButton.addEventListener("click", () => {
             tasks[taskIndex].priority = priorityValue;
             currentEditId = null;
             addButton.textContent = "Добавить";
+            updateLocalStorage();
         }
     } else {
         const task = {
@@ -62,6 +75,7 @@ addButton.addEventListener("click", () => {
         };
 
         tasks.push(task);
+        updateLocalStorage();
     }
 
     renderTasks();
@@ -124,7 +138,10 @@ function getPriorityText(priorityValue) {
 }
 
 function renderTasks() {
-    myTaskDiv.innerHTML = "";
+    homeTasks.innerHTML = "";
+    studyTasks.innerHTML = "";
+    workTasks.innerHTML = "";
+    otherTasks.innerHTML = "";
 
     if (tasks.length > 1) {
         changeButton.style.display = 'block';
@@ -137,12 +154,35 @@ function renderTasks() {
     const filteredTasks = filterTasks(tasks);
     const sortedTasks = sortTasks(filteredTasks);
 
-    if (filteredTasks.length === 0) {
-        myTaskDiv.innerHTML = '<p class="no-tasks">Задачи не найдены</p>';
+    if (filteredTasks.length == 0) {
+        homeTasks.innerHTML = '<p class="no-tasks">Задачи не найдены</p>';
+        studyTasks.innerHTML = '<p class="no-tasks">Задачи не найдены</p>';
+        workTasks.innerHTML = '<p class="no-tasks">Задачи не найдены</p>';
+        otherTasks.innerHTML = '<p class="no-tasks">Задачи не найдены</p>';
         return;
     }
-
     sortedTasks.forEach((task) => {
+        const taskElement = createTaskElement(task);
+
+        switch (task.category) {
+            case "Home":
+                homeTasks.appendChild(taskElement);
+                break;
+            case "Study":
+                studyTasks.appendChild(taskElement);
+                break;
+            case "Work":
+                workTasks.appendChild(taskElement);
+                break;
+            case "Other":
+                otherTasks.appendChild(taskElement);
+                break;
+        }
+    });
+}
+    /*
+    sortedTasks.forEach((task) => {
+
         const categoryText = getCategoryText(task.category);
         const priorityText = getPriorityText(task.priority);
         const dateText = formatDateTime(task.createdAt);
@@ -179,9 +219,38 @@ function renderTasks() {
 
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', DeleteTask);
-    });
-}
+    });*/
 
+function createTaskElement(task) {
+    const categoryText = getCategoryText(task.category);
+    const priorityText = getPriorityText(task.priority);
+    const dateText = formatDateTime(task.createdAt);
+    const taskElement = document.createElement('div');
+    taskElement.className = `task-item ${task.completed ? 'completed' : ''}`;
+    taskElement.dataset.id = task.id;
+    taskElement.innerHTML = `
+        <div class="task-content">
+            <div class="task-text">${task.text}</div>
+            <div class="task-info">
+                <span class="task-date">${dateText}</span>
+                <span class="task-category category-${task.category}">${categoryText}</span>
+                <span class="task-priority priority-${task.priority}">${priorityText}</span>
+                ${task.completed ? '<span class="task-status">Выполнено</span>' : ''}
+            </div>
+        </div>
+        <div class="task-actions">
+            <button class="complete-btn">${task.completed ? 'Возобновить' : 'Завершить'}</button>
+            <button class="edit-btn">Изменить</button>
+            <button class="delete-btn">Удалить</button>
+        </div>
+    `;
+
+    taskElement.querySelector('.complete-btn').addEventListener('click', CompleteTask);
+    taskElement.querySelector('.edit-btn').addEventListener('click', EditTask);
+    taskElement.querySelector('.delete-btn').addEventListener('click', DeleteTask);
+
+    return taskElement;
+}
 function sortTasks(tasks) {
     switch (sortBy) {
         case 'date':
@@ -202,11 +271,11 @@ function sortTasks(tasks) {
 }
 function filterTasks(tasks) {
     return tasks.filter(task => {
-        
+
         const categoryMatch = currentFilters.category == 'all' || task.category == currentFilters.category;
-        
+
         const priorityMatch = currentFilters.priority == 'all' || task.priority == currentFilters.priority;
-        
+
         return categoryMatch && priorityMatch;
     });
 }
@@ -217,6 +286,7 @@ function CompleteTask(e) {
 
     if (taskIndex !== -1) {
         tasks[taskIndex].completed = !tasks[taskIndex].completed;
+        updateLocalStorage();
         renderTasks();
     }
 }
@@ -236,6 +306,7 @@ function EditTask(e) {
             }
 
             tasks[taskIndex].text = newText.trim();
+            updateLocalStorage();
             renderTasks();
         }
     }
@@ -249,6 +320,7 @@ function DeleteTask(e) {
     if (taskIndex !== -1) {
 
         tasks.splice(taskIndex, 1);
+        updateLocalStorage();
         renderTasks();
 
     }
@@ -257,6 +329,6 @@ function DeleteTask(e) {
 function formatDateTime(date) {
     const taskDate = new Date(date);
     const dateString = taskDate.toLocaleDateString('ru-RU');
-    const timeString = taskDate.toLocaleTimeString('ru-RU'); 
-    return `${dateString} ${timeString}`; 
+    const timeString = taskDate.toLocaleTimeString('ru-RU');
+    return `${dateString} ${timeString}`;
 }
