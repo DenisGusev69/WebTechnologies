@@ -81,7 +81,7 @@ addButton.addEventListener("click", () => {
     renderTasks();
     taskInput.value = "";
 });
-
+/*
 changeButton.addEventListener("click", () => {
     if (sortBy == 'date') {
         sortBy = 'category';
@@ -95,6 +95,18 @@ changeButton.addEventListener("click", () => {
     }
     renderTasks();
 });
+*/
+changeButton.addEventListener("click", () => {
+    if (sortBy == 'date') {
+        sortBy = 'priority';
+        changeButton.textContent = 'Сортировка: По важности';
+    } else {
+        sortBy = 'date';
+        changeButton.textContent = 'Сортировка: По дате';
+    }
+    renderTasks();
+});
+
 filterCategorySelect.addEventListener("change", () => {
     currentFilters.category = filterCategorySelect.value;
     renderTasks();
@@ -179,6 +191,7 @@ function renderTasks() {
                 break;
         }
     });
+    setupDragAndDrop();
 }
     /*
     sortedTasks.forEach((task) => {
@@ -228,6 +241,7 @@ function createTaskElement(task) {
     const taskElement = document.createElement('div');
     taskElement.className = `task-item ${task.completed ? 'completed' : ''}`;
     taskElement.dataset.id = task.id;
+    taskElement.draggable = true;
     taskElement.innerHTML = `
         <div class="task-content">
             <div class="task-text">${task.text}</div>
@@ -244,22 +258,26 @@ function createTaskElement(task) {
             <button class="delete-btn">Удалить</button>
         </div>
     `;
-
+    taskElement.addEventListener('dragstart', handleDragStart);
+    taskElement.addEventListener('dragend', handleDragEnd);
     taskElement.querySelector('.complete-btn').addEventListener('click', CompleteTask);
     taskElement.querySelector('.edit-btn').addEventListener('click', EditTask);
     taskElement.querySelector('.delete-btn').addEventListener('click', DeleteTask);
 
     return taskElement;
 }
+
 function sortTasks(tasks) {
     switch (sortBy) {
         case 'date':
             return [...tasks].sort((a, b) => b.createdAt - a.createdAt);
+        /*
         case 'category':
             return [...tasks].sort((a, b) => {
                 const categoryOrder = { 'Home': 1, 'Study': 2, 'Work': 3, 'Other': 4 };
                 return categoryOrder[a.category] - categoryOrder[b.category];
             });
+        */
         case 'priority':
             return [...tasks].sort((a, b) => {
                 const priorityOrder = { 'High': 1, 'Middle': 2, 'Low': 3 };
@@ -331,4 +349,60 @@ function formatDateTime(date) {
     const dateString = taskDate.toLocaleDateString('ru-RU');
     const timeString = taskDate.toLocaleTimeString('ru-RU');
     return `${dateString} ${timeString}`;
+}
+
+
+function handleDragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.dataset.id);
+    e.target.classList.add('dragging');
+}
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.target.classList.add('drag-over');
+}
+function handleDragEnter(e) {
+    e.preventDefault();
+    e.target.classList.add('drag-over');
+}
+function handleDragLeave(e) {
+    e.target.classList.remove('drag-over');
+}
+function handleDrop(e) {
+    e.preventDefault();
+    e.target.classList.remove('drag-over');
+    
+    const taskId = parseInt(e.dataTransfer.getData('text/plain'));
+    const taskElement = document.querySelector(`[data-id="${taskId}"]`);
+    
+    if (taskElement) {
+        const categoryContainer = e.target.closest('.t_category');
+        if (categoryContainer) {
+            const newCategory = categoryContainer.dataset.category;
+            const taskIndex = tasks.findIndex(task => task.id == taskId);
+            
+            if (taskIndex !== -1 && tasks[taskIndex].category !== newCategory) {
+                tasks[taskIndex].category = newCategory;
+                updateLocalStorage();
+                renderTasks();
+            }
+        }
+    }
+}
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+    });
+}
+
+function setupDragAndDrop() {
+    const categoryContainers = document.querySelectorAll('.t_category');
+    
+    categoryContainers.forEach(container => {
+        container.addEventListener('dragover', handleDragOver);
+        container.addEventListener('dragenter', handleDragEnter);
+        container.addEventListener('dragleave', handleDragLeave);
+        container.addEventListener('drop', handleDrop);
+    });
 }
