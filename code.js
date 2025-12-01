@@ -18,10 +18,7 @@ const otherTasks = document.getElementById("t_other");
 let tasks = [];
 let currentEditId = null;
 let sortBy = 'date';
-let currentFilters = {
-    category: 'all',
-    priority: 'all'
-};
+let currentFilters = {category: 'all',priority: 'all'};
 changeButton.style.display = "none";
 !localStorage.tasks ? tasks = [] : tasks = JSON.parse(localStorage.getItem('tasks'));
 
@@ -60,11 +57,13 @@ addButton.addEventListener("click", () => {
             tasks[taskIndex].text = taskText;
             tasks[taskIndex].category = categoryValue;
             tasks[taskIndex].priority = priorityValue;
-            currentEditId = null;
-            addButton.textContent = "Добавить";
             updateLocalStorage();
+            renderTasks();
         }
-    } else {
+        currentEditId = null;
+        addButton.textContent = "Добавить";
+    } 
+    else {
         const task = {
             id: Date.now(),
             text: taskText,
@@ -315,18 +314,15 @@ function EditTask(e) {
     const taskIndex = tasks.findIndex(task => task.id == taskId);
 
     if (taskIndex !== -1) {
-        const newText = prompt("Введите новый текст задачи:", tasks[taskIndex].text);
-
-        if (newText && newText.trim() !== "") {
-            if (newText.trim().length < 3) {
-                alert("Задача должна содержать минимум 3 символа");
-                return;
-            }
-
-            tasks[taskIndex].text = newText.trim();
-            updateLocalStorage();
-            renderTasks();
-        }
+        const task = tasks[taskIndex];
+        taskInput.value = task.text;
+        categorySelect.value = task.category;
+        prioritySelect.value = task.priority;
+        currentEditId = task.id;
+        addButton.textContent = "Сохранить";
+        taskInput.focus();
+        taskItem.classList.add('editing');
+        taskItem.draggable = false;
     }
 }
 
@@ -351,7 +347,6 @@ function formatDateTime(date) {
     return `${dateString} ${timeString}`;
 }
 
-
 function handleDragStart(e) {
     e.dataTransfer.setData('text/plain', e.target.dataset.id);
     e.target.classList.add('dragging');
@@ -359,18 +354,15 @@ function handleDragStart(e) {
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.target.classList.add('drag-over');
+
 }
 function handleDragEnter(e) {
     e.preventDefault();
-    e.target.classList.add('drag-over');
 }
 function handleDragLeave(e) {
-    e.target.classList.remove('drag-over');
 }
 function handleDrop(e) {
     e.preventDefault();
-    e.target.classList.remove('drag-over');
     
     const taskId = parseInt(e.dataTransfer.getData('text/plain'));
     const taskElement = document.querySelector(`[data-id="${taskId}"]`);
@@ -391,9 +383,6 @@ function handleDrop(e) {
 }
 function handleDragEnd(e) {
     e.target.classList.remove('dragging');
-    document.querySelectorAll('.drag-over').forEach(el => {
-        el.classList.remove('drag-over');
-    });
 }
 
 function setupDragAndDrop() {
